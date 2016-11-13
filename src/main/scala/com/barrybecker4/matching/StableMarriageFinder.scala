@@ -19,13 +19,13 @@ class StableMarriageFinder {
     while (freeGuys.nonEmpty) {
       val guy = freeGuys.head
       freeGuys = freeGuys.tail
-      val guy_p = guyPrefers(guy)
-      var break = false
-      for (girl <- guy_p) {
-        if (!break) {
+      val guyPreferences = guyPrefers(guy)
+      var done = false
+      for (girl <- guyPreferences) {
+        if (!done) {
           if (!engagements.contains(girl)) {
             engagements += girl -> guy
-            break = true
+            done = true
           }
           else {
             val other_guy = engagements(girl)
@@ -33,7 +33,7 @@ class StableMarriageFinder {
             if (girl_p.indexOf(guy) < girl_p.indexOf(other_guy)) {
               engagements += girl -> guy
               freeGuys +:= other_guy
-              break = true
+              done = true
             }
           }
         }
