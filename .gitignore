@@ -11,7 +11,13 @@ lib_managed/
 src_managed/
 project/boot/
 project/plugins/project/
+.idea/*
 
 # Scala-IDE specific
 .scala_dependencies
 .worksheet
+.gradle/
+.idea/
+gradle/
+gradlew
+gradlew.bat
