@@ -7,7 +7,6 @@ import org.scalatest.FunSuite
   */
 class StableMarriageFinderSuite extends FunSuite {
 
-
   val case1: MarriagePreferences = new MarriagePreferences(
     guys = List("abe", "bob", "col", "dan", "ed", "fred", "gav", "hal", "ian", "jon"),
     girls = List("abi", "bea", "cath", "dee", "eve", "fay", "gay", "hope", "ivy", "jan"),
@@ -32,7 +31,8 @@ class StableMarriageFinderSuite extends FunSuite {
       "gay" -> List("jon", "gav", "hal", "fred", "bob", "abe", "col", "ed", "dan", "ian"),
       "hope" -> List("gav", "jon", "bob", "abe", "ian", "dan", "hal", "ed", "col", "fred"),
       "ivy" -> List("ian", "col", "hal", "gav", "fred", "bob", "abe", "ed", "jon", "dan"),
-      "jan" -> List("ed", "hal", "gav", "abe", "bob", "jon", "col", "ian", "fred", "dan")))
+      "jan" -> List("ed", "hal", "gav", "abe", "bob", "jon", "col", "ian", "fred", "dan"))
+  )
 
 
   test("test stable marriage") {
@@ -67,6 +67,35 @@ class StableMarriageFinderSuite extends FunSuite {
     matches += case1.girls(1) -> tmp
 
     println(case1.girls.head + " and " + case1.girls(1) + " have switched partners")
+
+    assertResult(false, "Matches were unexpectedly stable") {
+      smp.checkMatches(case1, matches)
+    }
+  }
+
+  test("test unstable marriage: case 2") {
+
+    val case2 = new MarriagePreferences(4,
+      guyPrefers = Map(
+        1 -> List(4, 3, 1, 2),
+        2 -> List(2, 1, 3, 4),
+        3 -> List(1, 3, 4, 2),
+        4 -> List(4, 3, 1, 2)),
+      girlPrefers = Map(
+        1 -> List(3, 2, 4, 1),
+        2 -> List(2, 3, 1, 4),
+        3 -> List(3, 1, 2, 4),
+        4 -> List(3, 2, 4, 1))
+    )
+
+    val smp: StableMarriageFinder = new StableMarriageFinder()
+    val matches = smp.findMatches(case2)
+
+    assertResult(Map(
+      "1" -> "3",
+      "2" -> "2",
+      "3" -> "1",
+      "4" -> "4")) { matches }
 
     assertResult(false, "Matches were unexpectedly stable") {
       smp.checkMatches(case1, matches)
