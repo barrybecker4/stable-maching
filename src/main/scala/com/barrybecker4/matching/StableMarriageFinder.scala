@@ -2,6 +2,10 @@ package com.barrybecker4.matching
 
 import scala.collection.immutable.TreeMap
 
+/**
+  * Find stable marriage matching if possible.
+  * Code derived from http://rosettacode.org/wiki/Stable_marriage_problem#Scala
+  */
 class StableMarriageFinder {
 
   /** @return proposed engagements found by stable marriage algorithm */
