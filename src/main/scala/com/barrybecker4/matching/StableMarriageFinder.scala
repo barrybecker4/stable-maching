@@ -9,34 +9,33 @@ import scala.collection.immutable.TreeMap
 class StableMarriageFinder {
 
   /** @return proposed engagements found by stable marriage algorithm */
-  def findMatches(guys: Iterable[String],
-                  guyPrefers: Map[String, List[String]],
-                  girlPrefers: Map[String, List[String]]): Map[String, String] = {
+  def findMatches(preferences: MarriagePreferences): Map[String, String] = {
 
     var engagements = new TreeMap[String, String]
-    var freeGuys = guys.toList
+    var freeGuys = preferences.guys.toList
 
     while (freeGuys.nonEmpty) {
       val guy = freeGuys.head
       freeGuys = freeGuys.tail
-      val guyPreferences = guyPrefers(guy)
+      val guyPreferences = preferences.guyPrefers(guy)
       var done = false
-      for (girl <- guyPreferences) {
-        if (!done) {
-          if (!engagements.contains(girl)) {
+      var i = 0
+      while (!done && i < guyPreferences.length) {
+        val girl = guyPreferences(i)
+        if (!engagements.contains(girl)) {
+          engagements += girl -> guy
+          done = true
+        }
+        else {
+          val other_guy = engagements(girl)
+          val girlPreference = preferences.girlPrefers(girl)
+          if (girlPreference.indexOf(guy) < girlPreference.indexOf(other_guy)) {
             engagements += girl -> guy
+            freeGuys +:= other_guy
             done = true
           }
-          else {
-            val other_guy = engagements(girl)
-            val girl_p = girlPrefers(girl)
-            if (girl_p.indexOf(guy) < girl_p.indexOf(other_guy)) {
-              engagements += girl -> guy
-              freeGuys +:= other_guy
-              done = true
-            }
-          }
         }
+        i += 1
       }
     }
 
@@ -44,12 +43,10 @@ class StableMarriageFinder {
   }
 
   /** @return true if the matches are stable */
-  def checkMatches(guys: Iterable[String], girls: Iterable[String],
-                   matches: Map[String, String],
-                   guyPrefers: Map[String, List[String]],
-                   girlPrefers: Map[String, List[String]]): Boolean = {
+  def checkMatches(preferences: MarriagePreferences,
+                   matches: Map[String, String]): Boolean = {
     //if (!matches.keySet.containsAll(girls) || !matches.values.containsAll(guys))
-    if (!(girls.forall(matches.contains) && guys.forall(matches.values.toSet.contains)))
+    if (!(preferences.girls.forall(matches.contains) && preferences.guys.forall(matches.values.toSet.contains)))
       return false
 
     var invertedMatches = new TreeMap[String, String]
@@ -58,16 +55,16 @@ class StableMarriageFinder {
     }
 
     for ((k, v) <- matches) {
-      val shePrefers = girlPrefers(k)
+      val shePrefers = preferences.girlPrefers(k)
       var sheLikesBetter: List[String] = List[String]()
       sheLikesBetter ++= shePrefers.slice(0, shePrefers.indexOf(v))
-      val hePrefers = guyPrefers(v)
+      val hePrefers = preferences.guyPrefers(v)
       var heLikesBetter = List[String]()
       heLikesBetter ++= hePrefers.slice(0, hePrefers.indexOf(k))
 
       for (guy <- sheLikesBetter) {
         val fiance = invertedMatches(guy)
-        val guy_p = guyPrefers(guy)
+        val guy_p = preferences.guyPrefers(guy)
         if (guy_p.indexOf(fiance) > guy_p.indexOf(k)) {
           println(s"$k likes $guy better than $v and $guy likes $k better than their current partner")
           return false
@@ -76,7 +73,7 @@ class StableMarriageFinder {
 
       for (girl <- heLikesBetter) {
         val fiance = matches(girl)
-        val girl_p = girlPrefers(girl)
+        val girl_p = preferences.girlPrefers(girl)
         if (girl_p.indexOf(fiance) > girl_p.indexOf(v)) {
           println(s"$v likes $girl better than $k and $girl likes $v better than their current partner")
           return false
