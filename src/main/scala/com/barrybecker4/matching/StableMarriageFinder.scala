@@ -45,7 +45,6 @@ class StableMarriageFinder {
   /** @return true if the matches are stable */
   def checkMatches(preferences: MarriagePreferences,
                    matches: Map[String, String]): Boolean = {
-    //if (!matches.keySet.containsAll(girls) || !matches.values.containsAll(guys))
     if (!(preferences.girls.forall(matches.contains) && preferences.guys.forall(matches.values.toSet.contains)))
       return false
 

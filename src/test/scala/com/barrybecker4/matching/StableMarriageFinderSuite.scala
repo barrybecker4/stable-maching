@@ -73,7 +73,7 @@ class StableMarriageFinderSuite extends FunSuite {
     }
   }
 
-  test("test unstable marriage: case 2") {
+  test("test stable marriage: integers only") {
 
     val case2 = new MarriagePreferences(4,
       guyPrefers = Map(
@@ -97,9 +97,55 @@ class StableMarriageFinderSuite extends FunSuite {
       "3" -> "1",
       "4" -> "4")) { matches }
 
-    assertResult(false, "Matches were unexpectedly stable") {
-      smp.checkMatches(case1, matches)
+    assertResult(true, "Matches were unexpectedly unstable") {
+      smp.checkMatches(case2, matches)
     }
   }
+
+  test("test stable marriage performance for large problem") {
+    val rand = new scala.util.Random(1)
+    val n = 100
+
+    def prefs(num: Int) = for (i <- 1 to num) yield { i -> List.fill(num)(rand.nextInt(num) + 1) }
+    val mp = new MarriagePreferences(n, guyPrefers = prefs(n).toMap, girlPrefers = prefs(n).toMap)
+
+    val smp: StableMarriageFinder = new StableMarriageFinder()
+    val matches = smp.findMatches(mp)
+
+    assertResult(Map("1" -> "24", "10" -> "82", "100" -> "17", "11" -> "30", "12" -> "83", "13" -> "38",
+      "14" -> "85", "15" -> "19", "16" -> "71", "17" -> "47", "18" -> "90", "19" -> "16",
+      "2" -> "14", "20" -> "73", "21" -> "62", "22" -> "25", "23" -> "64", "24" -> "5", "25" -> "27",
+      "26" -> "34", "27" -> "20", "28" -> "76", "29" -> "22", "3" -> "36", "30" -> "10", "31" -> "44",
+      "32" -> "54", "33" -> "95", "34" -> "78", "35" -> "45", "36" -> "79", "37" -> "72", "38" -> "49",
+      "39" -> "77", "4" -> "32", "40" -> "100", "41" -> "35", "42" -> "18", "43" -> "12", "44" -> "94",
+      "45" -> "60", "46" -> "67", "47" -> "8", "48" -> "11", "49" -> "65", "5" -> "81", "50" -> "98",
+      "51" -> "29", "52" -> "46", "53" -> "91", "54" -> "70", "55" -> "1", "56" -> "68", "57" -> "86",
+      "58" -> "9", "59" -> "93", "6" -> "21", "60" -> "52", "61" -> "80", "62" -> "31", "63" -> "59",
+      "64" -> "88", "65" -> "57", "66" -> "66", "67" -> "87", "68" -> "61", "69" -> "43", "7" -> "50",
+      "70" -> "33", "71" -> "13", "72" -> "99", "73" -> "28", "74" -> "53", "75" -> "2", "76" -> "7",
+      "77" -> "41", "78" -> "84", "79" -> "74", "8" -> "3", "80" -> "40", "81" -> "55", "82" -> "39",
+      "83" -> "97", "84" -> "37", "85" -> "23", "86" -> "51", "87" -> "89", "88" -> "92", "89" -> "15",
+      "9" -> "58", "90" -> "6", "91" -> "26", "92" -> "96", "93" -> "56", "94" -> "63", "95" -> "4",
+      "96" -> "42", "97" -> "69", "98" -> "75", "99" -> "48")) { matches }
+
+    assertResult(false, "Matches were unexpectedly stable") {
+      smp.checkMatches(mp, matches)
+    }
+  }
+
+  // Take 5.6 seconds on skylake.
+  test("test stable marriage performance for very large problem") {
+    val rand = new scala.util.Random(1)
+    val n = 2000
+
+    def prefs(num: Int) = for (i <- 1 to num) yield { i -> List.fill(num)(rand.nextInt(num) + 1) }
+    val mp = new MarriagePreferences(n, guyPrefers = prefs(n).toMap, girlPrefers = prefs(n).toMap)
+
+    val smp: StableMarriageFinder = new StableMarriageFinder()
+    val matches = smp.findMatches(mp)
+
+    assertResult(n) { matches.size }
+  }
+
 
 }
