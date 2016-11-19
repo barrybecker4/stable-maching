@@ -12,7 +12,7 @@ class StableMarriageFinder {
   def findMatches(preferences: MarriagePreferences): Map[String, String] = {
 
     var engagements = new TreeMap[String, String]
-    var freeGuys = preferences.guys.toList
+    var freeGuys = preferences.guys
 
     while (freeGuys.nonEmpty) {
       val guy = freeGuys.head
@@ -27,11 +27,11 @@ class StableMarriageFinder {
           done = true
         }
         else {
-          val other_guy = engagements(girl)
+          val otherGuy = engagements(girl)
           val girlPreference = preferences.girlPrefers(girl)
-          if (girlPreference.indexOf(guy) < girlPreference.indexOf(other_guy)) {
+          if (girlPreference.indexOf(guy) < girlPreference.indexOf(otherGuy)) {
             engagements += girl -> guy
-            freeGuys +:= other_guy
+            freeGuys +:= otherGuy
             done = true
           }
         }
@@ -53,28 +53,28 @@ class StableMarriageFinder {
       invertedMatches += _.swap
     }
 
-    for ((k, v) <- matches) {
-      val shePrefers = preferences.girlPrefers(k)
+    for ((someGirl, someGuy) <- matches) {
+      val shePrefers = preferences.girlPrefers(someGirl)
       var sheLikesBetter: List[String] = List[String]()
-      sheLikesBetter ++= shePrefers.slice(0, shePrefers.indexOf(v))
-      val hePrefers = preferences.guyPrefers(v)
+      sheLikesBetter ++= shePrefers.slice(0, shePrefers.indexOf(someGuy))
+      val hePrefers = preferences.guyPrefers(someGuy)
       var heLikesBetter = List[String]()
-      heLikesBetter ++= hePrefers.slice(0, hePrefers.indexOf(k))
+      heLikesBetter ++= hePrefers.slice(0, hePrefers.indexOf(someGirl))
 
       for (guy <- sheLikesBetter) {
         val fiance = invertedMatches(guy)
-        val guy_p = preferences.guyPrefers(guy)
-        if (guy_p.indexOf(fiance) > guy_p.indexOf(k)) {
-          println(s"$k likes $guy better than $v and $guy likes $k better than their current partner")
+        val guyPrefs = preferences.guyPrefers(guy)
+        if (guyPrefs.indexOf(fiance) > guyPrefs.indexOf(someGirl)) {
+          println(s"$someGirl likes $guy better than $someGuy and $guy likes $someGirl better than their current partner")
           return false
         }
       }
 
       for (girl <- heLikesBetter) {
         val fiance = matches(girl)
-        val girl_p = preferences.girlPrefers(girl)
-        if (girl_p.indexOf(fiance) > girl_p.indexOf(v)) {
-          println(s"$v likes $girl better than $k and $girl likes $v better than their current partner")
+        val girlPrefs = preferences.girlPrefers(girl)
+        if (girlPrefs.indexOf(fiance) > girlPrefs.indexOf(someGuy)) {
+          println(s"$someGuy likes $girl better than $someGirl and $girl likes $someGuy better than their current partner")
           return false
         }
       }

@@ -133,7 +133,7 @@ class StableMarriageFinderSuite extends FunSuite {
     }
   }
 
-  // Take 5.6 seconds on skylake.
+  // Take 5 seconds on skylake.
   test("test stable marriage performance for very large problem") {
     val rand = new scala.util.Random(1)
     val n = 2000
