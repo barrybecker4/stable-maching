@@ -48,38 +48,35 @@ class StableMarriageFinder {
     if (!(preferences.girls.forall(matches.contains) && preferences.guys.forall(matches.values.toSet.contains)))
       return false
 
-    var invertedMatches = new TreeMap[String, String]
-    matches.foreach {
-      invertedMatches += _.swap
-    }
+    val invertedMatches = matches.map(_.swap)
 
     for ((someGirl, someGuy) <- matches) {
       val shePrefers = preferences.girlPrefers(someGirl)
-      var sheLikesBetter: List[String] = List[String]()
-      sheLikesBetter ++= shePrefers.slice(0, shePrefers.indexOf(someGuy))
+      val sheLikesBetter: List[String] = shePrefers.slice(0, shePrefers.indexOf(someGuy))
       val hePrefers = preferences.guyPrefers(someGuy)
-      var heLikesBetter = List[String]()
-      heLikesBetter ++= hePrefers.slice(0, hePrefers.indexOf(someGirl))
+      val heLikesBetter = hePrefers.slice(0, hePrefers.indexOf(someGirl))
 
-      for (guy <- sheLikesBetter) {
-        val fiance = invertedMatches(guy)
-        val guyPrefs = preferences.guyPrefers(guy)
-        if (guyPrefs.indexOf(fiance) > guyPrefs.indexOf(someGirl)) {
-          println(s"$someGirl likes $guy better than $someGuy and $guy likes $someGirl better than their current partner")
-          return false
-        }
-      }
-
-      for (girl <- heLikesBetter) {
-        val fiance = matches(girl)
-        val girlPrefs = preferences.girlPrefers(girl)
-        if (girlPrefs.indexOf(fiance) > girlPrefs.indexOf(someGuy)) {
-          println(s"$someGuy likes $girl better than $someGirl and $girl likes $someGuy better than their current partner")
-          return false
-        }
-      }
+      if (checkForInstability(someGirl, someGuy, sheLikesBetter, preferences.guyPrefers, invertedMatches) ||
+        checkForInstability(someGuy, someGirl, heLikesBetter, preferences.girlPrefers, matches))
+        return false
     }
     true
+  }
+
+  /** @return true if there is a girl who likes another guy better than current partner,
+    *  and that guy likes her better than his current partner (or vice versa)
+    */
+  private  def checkForInstability(person: String, otherPerson: String, personLikesBetter: List[String],
+                                   prefs: Map[String, List[String]], theMatches: Map[String, String]): Boolean = {
+    for (p <- personLikesBetter) {
+      val fiance = theMatches(p)
+      val personPrefs = prefs(p)
+      if (personPrefs.indexOf(fiance) > personPrefs.indexOf(person)) {
+        println(s"$person likes $p better than $otherPerson and $p likes $person better than their current partner")
+        return true
+      }
+    }
+    false
   }
 
 }
