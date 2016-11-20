@@ -1,8 +1,7 @@
 package com.barrybecker4.matching.stableroommate
 
-import com.barrybecker4.matching.stablemarriage.MarriagePreferences
-
 import scala.collection.immutable.TreeMap
+import scala.collection.mutable
 
 /**
   * Find stable marriage matching if possible.
@@ -12,6 +11,23 @@ class StableRoommateFinder {
 
   /** @return proposed pairings found by stable roommate algorithm */
   def findMatches(preferences: RoommatePreferences): Map[String, String] = {
+
+    // Phase 1
+    val pairings = findInitialPairings(preferences)
+
+    // Phase 2
+    val reducedPrefs = findReducedPrefs(pairings, preferences)
+
+    println("reduced = " + reducedPrefs.map(x => x._1 + " -> " + x._2.mkString(", ")).mkString("\n"))
+
+    // Phase 3
+    val finalPrefs = reduceBasedOnCycles(pairings, reducedPrefs)
+
+    pairings
+
+  }
+
+  private def findInitialPairings(preferences: RoommatePreferences): Map[String, String] = {
 
     var pairings = new TreeMap[String, String]
     var freePeople = preferences.people
@@ -29,11 +45,11 @@ class StableRoommateFinder {
           done = true
         }
         else {
-          val otherGuy = pairings(candidate)
+          val currentMatch = pairings(candidate)
           val candidatePrefs = preferences.prefers(candidate)
-          if (candidatePrefs.indexOf(person) < candidatePrefs.indexOf(otherGuy)) {
+          if (candidatePrefs.indexOf(person) < candidatePrefs.indexOf(currentMatch)) {
             pairings += candidate -> person
-            freePeople +:= otherGuy
+            freePeople +:= currentMatch
             done = true
           }
         }
@@ -43,6 +59,64 @@ class StableRoommateFinder {
 
     pairings
   }
+
+  private def findReducedPrefs(pairings: Map[String, String],
+                               preferences: RoommatePreferences): mutable.Map[String, List[String]] = {
+    val reducedPrefs = collection.mutable.Map[String, List[String]]() ++= preferences.prefers
+
+    preferences.people.foreach(person => {
+      val currentMatch = pairings(person)
+      val currentPrefs = reducedPrefs(currentMatch)
+      reducedPrefs.put(currentMatch, currentPrefs.takeWhile(x => x != person) :+ person)
+    })
+
+    reducedPrefs
+  }
+
+  private def reduceBasedOnCycles(pairings: Map[String, String],
+                                  reducedPrefs: mutable.Map[String, List[String]]): Map[String, List[String]] = {
+
+    var done = false
+
+    while (!done) {
+      val firstPerson = reducedPrefs.find(x => x._2.length > 1).map(_._1)
+      if (firstPerson.isDefined) {
+        var lastPrefsList: List[String] = List(firstPerson.get)
+        var secondPrefsList: List[String] = List()
+
+        // repeat this process until someone has an empty preference list (no stable pairing),
+        // or until everyone has exactly one person in their list (stable)
+
+        // repeat until same person appears twice in one of the two lists
+        while (!done) {
+          val secondPref = reducedPrefs.get(lastPrefsList.last).tail.head.toString()
+          if (secondPrefsList.contains(secondPref)) done = true // dupe name
+          secondPrefsList :+= secondPref
+          val lastPref = reducedPrefs(secondPref).last
+          if (lastPrefsList.contains(lastPref)) done = true // dupe name
+          lastPrefsList :+= lastPref
+        }
+
+        if (done) {
+          lastPrefsList = lastPrefsList.tail // get the 2 lists to align
+          while (lastPrefsList.nonEmpty) {
+            val p1 = lastPrefsList.head
+            val p2 = secondPrefsList.head
+            reducedPrefs(p1) = reducedPrefs(p1).filter(_ != p2)
+            reducedPrefs(p2) = reducedPrefs(p2).filter(_ != p1)
+            lastPrefsList = lastPrefsList.tail
+            secondPrefsList = secondPrefsList.tail
+          }
+        }
+      } else done = true
+    }
+
+    reducedPrefs.toMap
+  }
+
+  /*private def removePrefsAfter(person:String, currentPrefs: List[String]): List[String] = {
+  }*/
+
 
   /** @return true if the matches are stable */
   def checkMatches(preferences: RoommatePreferences,
