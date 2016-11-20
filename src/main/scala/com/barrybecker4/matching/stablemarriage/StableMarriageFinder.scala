@@ -1,4 +1,4 @@
-package com.barrybecker4.matching
+package com.barrybecker4.matching.stablemarriage
 
 import scala.collection.immutable.TreeMap
 

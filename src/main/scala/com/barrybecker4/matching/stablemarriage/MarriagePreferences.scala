@@ -1,9 +1,9 @@
-package com.barrybecker4.matching
+package com.barrybecker4.matching.stablemarriage
 
 /**
   * Encapsulates preferences for the guys and girls.
   * @param guys of boys
-  * @param girls names of girsl
+  * @param girls names of girls
   * @param guyPrefers boy preferences as list of girls in preferred order
   * @param girlPrefers girl preferences as list of boys in preferred order
   */

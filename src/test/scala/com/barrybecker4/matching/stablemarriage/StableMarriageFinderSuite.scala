@@ -1,4 +1,4 @@
-package com.barrybecker4.matching
+package com.barrybecker4.matching.stablemarriage
 
 import org.scalatest.FunSuite
 
@@ -6,6 +6,8 @@ import org.scalatest.FunSuite
   * @author Barry Becker
   */
 class StableMarriageFinderSuite extends FunSuite {
+
+  val smp = new StableMarriageFinder()
 
   val case1: MarriagePreferences = new MarriagePreferences(
     guys = List("abe", "bob", "col", "dan", "ed", "fred", "gav", "hal", "ian", "jon"),
@@ -37,7 +39,6 @@ class StableMarriageFinderSuite extends FunSuite {
 
   test("test stable marriage") {
 
-    val smp: StableMarriageFinder = new StableMarriageFinder()
     val matches = smp.findMatches(case1)
 
     assertResult(Map(
@@ -59,7 +60,6 @@ class StableMarriageFinderSuite extends FunSuite {
 
   test("test unstable marriage") {
 
-    val smp: StableMarriageFinder = new StableMarriageFinder()
     var matches = smp.findMatches(case1)
 
     val tmp = matches(case1.girls.head)
@@ -88,7 +88,6 @@ class StableMarriageFinderSuite extends FunSuite {
         4 -> List(3, 2, 4, 1))
     )
 
-    val smp: StableMarriageFinder = new StableMarriageFinder()
     val matches = smp.findMatches(case2)
 
     assertResult(Map(
@@ -108,8 +107,6 @@ class StableMarriageFinderSuite extends FunSuite {
 
     def prefs(num: Int) = for (i <- 1 to num) yield { i -> List.fill(num)(rand.nextInt(num) + 1) }
     val mp = new MarriagePreferences(n, guyPrefers = prefs(n).toMap, girlPrefers = prefs(n).toMap)
-
-    val smp: StableMarriageFinder = new StableMarriageFinder()
     val matches = smp.findMatches(mp)
 
     assertResult(Map("1" -> "24", "10" -> "82", "100" -> "17", "11" -> "30", "12" -> "83", "13" -> "38",
