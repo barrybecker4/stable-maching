@@ -13,9 +13,10 @@ class RoommatePreferences(val people: List[String],
     * Alternate constructor for when input is specified as integer indices.
     * @param numPairs number of people. They will both be labeled "1", "2", ..."n".
     */
-  def this(numPairs: Int,
-           prefers: Map[Int, List[Int]]) {
-    this(List.range(1, numPairs + 1).map(_.toString),
-      prefers.map(entry => entry._1.toString -> entry._2.map(_.toString)))
+  def this(numPairs: Int, prefers: Map[Int, List[Int]]) {
+    this(
+      List.range(1, numPairs + 1).map(_.toString),
+      prefers.map(entry => entry._1.toString -> entry._2.map(_.toString))
+    )
   }
 }
