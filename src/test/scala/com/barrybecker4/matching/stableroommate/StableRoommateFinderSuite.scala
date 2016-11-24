@@ -35,8 +35,56 @@ class StableRoommateFinderSuite extends FunSuite {
       "jan" -> List("ed", "hal", "gav", "abe", "bob", "jon", "col", "ian", "fred", "dan"))
   )
 
+  test("test stable roommates: trivial 2 person case") {
 
-  test("test stable roommate") {
+    val twoPeople = new RoommatePreferences(2,
+      prefers = Map(
+        1 -> List(2),
+        2 -> List(1)
+    ))
+
+    val matches = srp.findMatches(twoPeople)
+
+    assertResult(Map("2" -> "1")) { matches }
+  }
+
+  test("test stable roommates: trivial 4 person case") {
+
+    val fourPeople = new RoommatePreferences(2,
+      prefers = Map(
+        1 -> List(2, 4),
+        2 -> List(1, 3),
+        3 -> List(2, 4),
+        4 -> List(3, 1)
+      ))
+
+    val matches = srp.findMatches(fourPeople)
+
+    assertResult(Map("2" -> "1", "4" -> "3")) { matches }
+  }
+
+  test("test stable roommates: unstable 4 person case (has cycle)") {
+
+    val fourPeople = new RoommatePreferences(
+      people = List("A", "B", "C", "D"),
+      prefers = Map(
+        "A" -> List("B", "C", "D"),
+        "B" -> List("C", "A", "D"),
+        "C" -> List("A" ,"B", "D"),
+        "D" -> List("A", "B", "C")
+      ))
+
+    // no stable solution possible. What should be returned?
+    try {
+      srp.findMatches(fourPeople)
+      fail("Should not get here")
+    } catch {
+      case ie: IllegalArgumentException => // success
+      case e: Throwable => "Unexpected" + e.printStackTrace()
+    }
+  }
+
+  test("test stable roommate for case1") {
 
     val matches = srp.findMatches(case1)
 
@@ -46,17 +94,6 @@ class StableRoommateFinderSuite extends FunSuite {
       "gav" -> "gay", "gay" -> "gav", "hal" -> "eve", "hope" -> "ian", "ian" -> "hope", "ivy" -> "abe",
       "jan" -> "ed", "jon" -> "abi")
     ) { matches }
-
-    assertResult(true, "Matches were unexpectedly not stable") {
-      srp.checkMatches(case1, matches)
-    }
-  }
-
-  test("test stable pairingfor case1") {
-    val matches = srp.findMatches(case1)
-    assertResult(true, "Matches were unexpectedly unstable") {
-      srp.checkMatches(case1, matches)
-    }
   }
 
   test("test stable roommates: integers only") {
@@ -75,13 +112,8 @@ class StableRoommateFinderSuite extends FunSuite {
 
     assertResult(Map("2" -> "1", "5" -> "2", "4" -> "3")) { matches } // this is wrong
                  //  "1" -> "6", "2" -> "4", "3" -> "5")) // this is right
-
-
-    //assertResult(true, "Matches were unexpectedly unstable") {
-    //  srp.checkMatches(case2, matches)
-    //}
   }
-/*
+  /*
   test("test stable marriage performance for large problem") {
     val rand = new scala.util.Random(1)
     val n = 100
@@ -108,9 +140,9 @@ class StableRoommateFinderSuite extends FunSuite {
       "9" -> "58", "90" -> "6", "91" -> "26", "92" -> "96", "93" -> "56", "94" -> "63", "95" -> "4",
       "96" -> "42", "97" -> "69", "98" -> "75", "99" -> "48")) { matches }
 
-    assertResult(false, "Matches were unexpectedly stable") {
-      srp.checkMatches(mp, matches)
-    }
+    //assertResult(false, "Matches were unexpectedly stable") {
+    //  srp.checkMatches(mp, matches)
+    //}
   }
 
   // Take 5 seconds on skylake.

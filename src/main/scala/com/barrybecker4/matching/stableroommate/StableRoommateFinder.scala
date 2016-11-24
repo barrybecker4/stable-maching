@@ -19,7 +19,7 @@ class StableRoommateFinder {
 
     // Phase 3
     reduceBasedOnCycles(reducedPrefs)
-    println("\nfinalPrefs = \n" + reducedPrefs.map(x => x._1 + " -> " + x._2.mkString(", ")).mkString("\n"))
+    println("\nfinalReducedPrefs = \n" + reducedPrefs.map(x => x._1 + " -> " + x._2.mkString(", ")).mkString("\n"))
 
     findPairings(reducedPrefs)
   }
@@ -131,18 +131,24 @@ class StableRoommateFinder {
     val pairings = mutable.Map[String, String]()
     println("Reduced prefs keys = " + reducedPrefs.keys.mkString(", "))
     reducedPrefs.foreach(entry => {
-      println("about to get favorite for " + entry._2.head + " among " + reducedPrefs.keys.mkString(", "))
-      if (reducedPrefs.contains(entry._2.head)) {
-        val favorite = reducedPrefs(entry._2.head).head
+      if (entry._2.isEmpty) throw new IllegalArgumentException("Cannot find a stable matching.")
+      val favorite = entry._2.head
+      println("The favorite for " + entry._1 + " is " + favorite +" among " + reducedPrefs.keys.mkString(", "))
+      if (reducedPrefs.contains(favorite)) {
+        val orig = reducedPrefs(favorite).head
+        require (orig == entry._1, "Expected that " + entry._1 + " and the first element of " + favorite + "'s prefs: "
+          + reducedPrefs(favorite).mkString(", ") + "  would be the same.")
         pairings.put(entry._1, favorite)
         println("about to remove " + favorite + "'s list = "+ reducedPrefs(favorite).mkString(", ") + " it should contain only "+ entry._1)
         reducedPrefs.remove(favorite)
+      } else {
+        throw new IllegalArgumentException("Cannot find a stable matching.")
       }
     })
     pairings.toMap
   }
 
-  /** @return true if the matches are stable */
+  /* @return true if the matches are stable *
   def checkMatches(preferences: RoommatePreferences,
                    matches: Map[String, String]): Boolean = {
     if (!preferences.people.forall(matches.contains))
@@ -160,11 +166,11 @@ class StableRoommateFinder {
         return false
     }
     true
-  }
+  }*/
 
-  /** @return true if there is a girl who likes another guy better than current partner,
+  /* @return true if there is a girl who likes another guy better than current partner,
     *  and that guy likes her better than his current partner (or vice versa)
-    */
+    *
   private  def checkForInstability(person: String, otherPerson: String, personLikesBetter: List[String],
                                    prefs: Map[String, List[String]], theMatches: Map[String, String]): Boolean = {
     for (p <- personLikesBetter) {
@@ -176,6 +182,5 @@ class StableRoommateFinder {
       }
     }
     false
-  }
-
+  }*/
 }
