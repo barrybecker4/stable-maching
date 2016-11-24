@@ -36,7 +36,7 @@ class StableRoommateFinder {
 
     var pairings = new TreeMap[String, String]
     var freePeople = preferences.people
-    val reducedPrefs = collection.mutable.Map[String, List[String]]() ++= preferences.prefers
+    val reducedPrefs = mutable.Map[String, List[String]]() ++= preferences.prefers
 
     while (freePeople.nonEmpty) {
       val person = freePeople.head
@@ -48,13 +48,7 @@ class StableRoommateFinder {
         val candidate = prefs(i)
         if (!pairings.contains(candidate)) {
           pairings += candidate -> person
-          val candidatePrefs = reducedPrefs(candidate)
-          // remove from candidates's list all participants x after person
-          val (keep, drop) = candidatePrefs.splitAt(candidatePrefs.indexOf(person) + 1)
-          reducedPrefs.put(candidate, keep)
-          drop.foreach(x => {
-            reducedPrefs.put(x, reducedPrefs(x).filter(_ != candidate))
-          })
+          rejectSymmetrically(person, candidate, reducedPrefs)
           done = true
         }
         else {
@@ -63,13 +57,7 @@ class StableRoommateFinder {
           if (candidatePrefs.indexOf(person) < candidatePrefs.indexOf(currentMatch)) {
             pairings += candidate -> person
             freePeople +:= currentMatch
-
-            val (keep, drop) = candidatePrefs.splitAt(candidatePrefs.indexOf(person) + 1)
-            reducedPrefs.put(candidate, keep)
-            drop.foreach(x => {
-              reducedPrefs.put(x, reducedPrefs(x).filter(_ != candidate))
-            })
-
+            rejectSymmetrically(person, candidate, reducedPrefs)
             done = true
           }
         }
@@ -79,6 +67,17 @@ class StableRoommateFinder {
 
     println("\ninitial pairings = " + pairings.map(x => x._1 + " -> " + x._2).mkString("\n"))
     reducedPrefs
+  }
+
+  // remove from candidates's list all participants x after person
+  private def rejectSymmetrically(person: String, candidate: String,
+                                  reducedPrefs: mutable.Map[String, List[String]]): Unit = {
+    val candidatePrefs = reducedPrefs(candidate)
+    val (keep, drop) = candidatePrefs.splitAt(candidatePrefs.indexOf(person) + 1)
+    reducedPrefs.put(candidate, keep)
+    drop.foreach(x => {
+      reducedPrefs.put(x, reducedPrefs(x).filter(_ != candidate))
+    })
   }
 
   /**

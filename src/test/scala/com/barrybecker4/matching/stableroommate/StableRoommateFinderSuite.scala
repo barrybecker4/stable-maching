@@ -90,10 +90,8 @@ class StableRoommateFinderSuite extends FunSuite {
     val matches = srp.findMatches(case1)
 
     assertResult(Map(
-      "abe" -> "ivy", "abi" -> "jon", "bea" -> "fred", "bob" -> "cath", "cath" -> "bob", "col" -> "dee",
-      "dan" -> "fay", "dee" -> "col", "ed" -> "jan", "eve" -> "hal", "fay" -> "dan", "fred" -> "bea",
-      "gav" -> "gay", "gay" -> "gav", "hal" -> "eve", "hope" -> "ian", "ian" -> "hope", "ivy" -> "abe",
-      "jan" -> "ed", "jon" -> "abi")
+      "dee" -> "col", "ed" -> "jan", "fred" -> "bea", "eve" -> "hal", "ian" -> "hope",
+      "abe" -> "ivy", "fay" -> "dan", "abi" -> "jon", "bob" -> "cath", "gay" -> "gav")
     ) { matches }
   }
 
