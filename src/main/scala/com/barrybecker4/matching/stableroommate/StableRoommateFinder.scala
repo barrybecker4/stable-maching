@@ -15,7 +15,7 @@ class StableRoommateFinder {
 
     // Phase 1
     val reducedPrefs = findInitialPairings(preferences)
-    println("\nreduced = \n" + reducedPrefs.map(x => x._1 + " -> " + x._2.mkString(", ")).mkString("\n"))
+    println("\nreduced = \n" + reducedPrefs.map(x => x._1 + " -> " + x._2.mkString(", ")).mkString("\n")) // correct
 
     // Phase 3
     reduceBasedOnCycles(reducedPrefs)
@@ -28,7 +28,7 @@ class StableRoommateFinder {
     * Participants propose to each other, in a manner similar to that of the Gale-Shapley algorithm for the stable marriage problem.
     * Consider two participants, person and candidate. If candidate holds a proposal from person, then we remove from candidates's
     * list all participants x after person, and symmetrically, for each removed participant x, we remove candidate from x's list,
-    * so that candidate is first in person's list; and person, last in candidates's, since candidate and any x cannot be partners in any stable matching.
+    * so that candidate is first in person's list; and person, last in candidates's.
     * The resulting reduced set of preference lists together is called the Phase 1 table.
     * In this table, if any reduced list is empty, then there is no stable matching. Otherwise, the Phase 1 table is a stable table.
     */
@@ -63,6 +63,13 @@ class StableRoommateFinder {
           if (candidatePrefs.indexOf(person) < candidatePrefs.indexOf(currentMatch)) {
             pairings += candidate -> person
             freePeople +:= currentMatch
+
+            val (keep, drop) = candidatePrefs.splitAt(candidatePrefs.indexOf(person) + 1)
+            reducedPrefs.put(candidate, keep)
+            drop.foreach(x => {
+              reducedPrefs.put(x, reducedPrefs(x).filter(_ != candidate))
+            })
+
             done = true
           }
         }
@@ -148,39 +155,4 @@ class StableRoommateFinder {
     pairings.toMap
   }
 
-  /* @return true if the matches are stable *
-  def checkMatches(preferences: RoommatePreferences,
-                   matches: Map[String, String]): Boolean = {
-    if (!preferences.people.forall(matches.contains))
-      return false
-
-    val invertedMatches = matches.map(_.swap)
-
-    for ((someGuy, someOtherGuy) <- matches) {
-      val someGuyPrefers = preferences.prefers(someGuy)
-      val someGuyLikesBetter: List[String] = someGuyPrefers.slice(0, someGuyPrefers.indexOf(someOtherGuy))
-      val someOtherGuyPrefers = preferences.prefers(someOtherGuy)
-      //val someOtherGuyLikesBetter = someOtherGuyPrefers.slice(0, someOtherGuyPrefers.indexOf(someGuy))
-
-      if (checkForInstability(someGuy, someOtherGuy, someGuyLikesBetter, preferences.prefers, invertedMatches))
-        return false
-    }
-    true
-  }*/
-
-  /* @return true if there is a girl who likes another guy better than current partner,
-    *  and that guy likes her better than his current partner (or vice versa)
-    *
-  private  def checkForInstability(person: String, otherPerson: String, personLikesBetter: List[String],
-                                   prefs: Map[String, List[String]], theMatches: Map[String, String]): Boolean = {
-    for (p <- personLikesBetter) {
-      val fiance = theMatches(p)
-      val personPrefs = prefs(p)
-      if (personPrefs.indexOf(fiance) > personPrefs.indexOf(person)) {
-        println(s"$person likes $p better than $otherPerson and $p likes $person better than their current partner")
-        return true
-      }
-    }
-    false
-  }*/
 }

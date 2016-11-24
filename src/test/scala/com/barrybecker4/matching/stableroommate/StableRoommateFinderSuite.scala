@@ -63,7 +63,7 @@ class StableRoommateFinderSuite extends FunSuite {
     assertResult(Map("2" -> "1", "4" -> "3")) { matches }
   }
 
-  test("test stable roommates: unstable 4 person case (has cycle)") {
+  test("test stable roommates: unstable 4 person case (has cycle) (no one likes D") {
 
     val fourPeople = new RoommatePreferences(
       people = List("A", "B", "C", "D"),
@@ -84,6 +84,7 @@ class StableRoommateFinderSuite extends FunSuite {
     }
   }
 
+
   test("test stable roommate for case1") {
 
     val matches = srp.findMatches(case1)
@@ -94,6 +95,23 @@ class StableRoommateFinderSuite extends FunSuite {
       "gav" -> "gay", "gay" -> "gav", "hal" -> "eve", "hope" -> "ian", "ian" -> "hope", "ivy" -> "abe",
       "jan" -> "ed", "jon" -> "abi")
     ) { matches }
+  }
+
+  test("test stable roommates: 6 person case from https://www.youtube.com/watch?v=5QLxAp8mRKo&t=15s") {
+
+    val case2 = new RoommatePreferences(6,
+      prefers = Map(
+        1 -> List(2, 4, 6, 3, 5),
+        2 -> List(4, 5, 6, 1, 3),
+        3 -> List(4, 5, 6, 1, 2),
+        4 -> List(6, 3, 1, 5, 2),
+        5 -> List(6, 3, 4, 2, 1),
+        6 -> List(1, 2, 4, 3, 5))
+    )
+
+    val matches = srp.findMatches(case2)
+
+    assertResult(Map("1" -> "6", "2" -> "5", "3" -> "4")) { matches }
   }
 
   test("test stable roommates: integers only") {
