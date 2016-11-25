@@ -17,10 +17,11 @@ class StableRoommateFinder {
     val reducedPrefs = findInitialPairings(preferences)
     println("\nreduced = \n" + reducedPrefs.map(x => x._1 + " -> " + x._2.mkString(", ")).mkString("\n")) // correct
 
-    // Phase 3
+    // Phase 2
     reduceBasedOnCycles(reducedPrefs)
     println("\nfinalReducedPrefs = \n" + reducedPrefs.map(x => x._1 + " -> " + x._2.mkString(", ")).mkString("\n"))
 
+    // If stable, each persons preference list should be of length 1
     findPairings(reducedPrefs)
   }
 
@@ -81,43 +82,54 @@ class StableRoommateFinder {
   }
 
   /**
-    * T = Phase 1 table;
-    * while (true) {
-    *      identify a rotation r in T;
-    *      eliminate r from T;
-    *      if some list in T becomes empty,
-    *          return null; (no stable matching can exist)
-    *      else if (each reduced list in T has size 1)
-    *          return the matching M = {{x, y} | x and y are on each other's lists in T}; (this is a stable matching)
-    *  }
+    * for all cycles in (p1 ... p2) and (q1 ... q2) such that:
+    *   qi is the second preference of pi and pi+1 is the last preference of qi do
+    *       for i = 1 to n-1
+    *           rejectSymmetrically(qi, pi+1)
     * @return final reduced preferences
     */
   private def reduceBasedOnCycles(reducedPrefs: mutable.Map[String, List[String]]) = {
     var done = false
 
+    // Repeat this process until someone has an empty preference list (no stable pairing),
+    // or until everyone has exactly one person in their list (stable)
     while (!done) {
       // find a person with more than 1 person in their preference list
-      val firstPerson = reducedPrefs.find(x => x._2.length > 1).map(_._1)
+      val firstPerson = reducedPrefs.find(_._2.length > 1).map(_._1)
       if (firstPerson.isDefined) {
         var lastPrefsList: List[String] = List(firstPerson.get)
         var secondPrefsList: List[String] = List()
 
-        // Repeat this process until someone has an empty preference list (no stable pairing),
-        // or until everyone has exactly one person in their list (stable)
-
+        // Find a cycle if one exists...
         // repeat until same person appears twice in one of the two lists
         while (!done) {
-          if (reducedPrefs.get(lastPrefsList.last).size > 1) {
-            val secondPref = reducedPrefs.get(lastPrefsList.last).tail.head.toString()
-            if (secondPrefsList.contains(secondPref)) done = true // dupe name
+          println("second pref list (for " + lastPrefsList.last + ") = " + reducedPrefs(lastPrefsList.last).mkString(", ")
+            + " and size = " + reducedPrefs(lastPrefsList.last).length)
+          if (reducedPrefs(lastPrefsList.last).size > 1) {
+            val secondPref = reducedPrefs(lastPrefsList.last).tail.head.toString
+            println("secondPref = " + secondPref + " test to see if in " + secondPrefsList)
+            println("does secondPrefsList " + secondPrefsList.mkString(", ") + " contain " + secondPref + "? " + secondPrefsList.contains(secondPref))
+            if (secondPrefsList.contains(secondPref)) {
+              done = true // dupe name
+            }
             secondPrefsList :+= secondPref
+            println("added " + secondPref + " to secondPrefsList = " + secondPrefsList.mkString(", "))
+            if (reducedPrefs(secondPref).isEmpty) {
+              throw new IllegalArgumentException("Cannot find a stable matching.")
+            }
             val lastPref = reducedPrefs(secondPref).last
-            if (lastPrefsList.contains(lastPref)) done = true // dupe name
+            println("does lastPrefsList " + lastPrefsList.mkString(", ") + " contain " + lastPref + "? " + lastPrefsList.contains(lastPref))
+            if (lastPrefsList.contains(lastPref))
+              done = true // dupe name
             lastPrefsList :+= lastPref
+            println("added " + lastPref + " to lastPrefsList = " + lastPrefsList.mkString(", "))
           }
-          done = true  // there was no second preference
+          else done = true  // there was no second preference
         }
+        println(" - lastPrefslist = " + lastPrefsList.mkString(", "))
+        println(" - secondPrefslist = " + secondPrefsList.mkString(", "))
 
+        // ... and symmetrically remove it if one was found
         if (done) {
           lastPrefsList = lastPrefsList.tail // get the 2 lists to align
           while (lastPrefsList.nonEmpty) {
@@ -128,6 +140,8 @@ class StableRoommateFinder {
             lastPrefsList = lastPrefsList.tail
             secondPrefsList = secondPrefsList.tail
           }
+          println("\nreducedPrefs after symmetric removal = \n" + reducedPrefs.map(x => x._1 + " -> " + x._2.mkString(", ")).mkString("\n") + "\n")
+          done = false
         }
       } else done = true
     }
