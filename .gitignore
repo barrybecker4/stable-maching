@@ -12,12 +12,15 @@ src_managed/
 project/boot/
 project/plugins/project/
 .idea/*
+stable-maching.iml
+stable-maching.ipr
 
 # Scala-IDE specific
 .scala_dependencies
 .worksheet
 .gradle/
 .idea/
+build/
 gradle/
 gradlew
 gradlew.bat
