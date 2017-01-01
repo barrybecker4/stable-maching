@@ -14,6 +14,7 @@ project/plugins/project/
 .idea/*
 stable-maching.iml
 stable-maching.ipr
+stable-maching.iws
 
 # Scala-IDE specific
 .scala_dependencies
@@ -21,3 +22,4 @@ stable-maching.ipr
 .gradle/
 .idea/
 build/
+
