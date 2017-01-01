@@ -203,4 +203,23 @@ class StableRoommateFinderSuite extends FunSuite {
     assertResult(n) { matches.size }
   }*/
 
+  /*
+  test("test stable roommates: integers only") {
+
+    val case2 = new RoommatePreferences(6,
+      prefers = Map(
+        1 -> List(3, 4, 2, 6, 5),
+        2 -> List(6, 5, 4, 1, 3),
+        3 -> List(2, 4, 5, 1, 6),
+        4 -> List(5, 2, 3, 6, 1),
+        5 -> List(3, 1, 2, 4, 6),
+        6 -> List(5, 1, 3, 4, 2))
+    )
+
+    val matches = srp.findMatches(case2)
+
+    assertResult(Map("2" -> "1", "5" -> "2", "4" -> "3")) { matches } // this is wrong
+    //  "1" -> "6", "2" -> "4", "3" -> "5")) // this is right
+  }
+   */
 }
