@@ -3,11 +3,15 @@ package com.barrybecker4.matching.stablemarriage
 import org.scalatest.funsuite.AnyFunSuite
 
 /**
+  * See http://rosettacode.org/wiki/Stable_marriage_problem
+  * If num boys -- girls, there is a stable matching for any set of preferences.
+  *
   * @author Barry Becker
   */
 class StableMarriageFinderSuite extends AnyFunSuite {
 
   val smp = new StableMarriageFinder()
+  val verifier = new StableMarriageVerifier()
 
   val case1: MarriagePreferences = new MarriagePreferences(
     guys = List("abe", "bob", "col", "dan", "ed", "fred", "gav", "hal", "ian", "jon"),
@@ -53,14 +57,19 @@ class StableMarriageFinderSuite extends AnyFunSuite {
       "ivy" -> "abe",
       "jan" -> "ed")) { matches }
 
-    assertResult(true, "Matches were unexpectedly not stable") {
-      smp.checkMatches(case1, matches)
+    assertResult(true, "Matches were unexpectedly unstable") {
+      verifier.verifyStable(case1, matches)
     }
   }
 
-  test("test unstable marriage") {
+  test("test unstable marriage after rearrangement") {
 
     var matches = smp.findMatches(case1)
+
+    // first verify that a stable matching was found
+    assertResult(true, "Matches were unexpectedly unstable") {
+      verifier.verifyStable(case1, matches)
+    }
 
     val tmp = matches(case1.girls.head)
     matches += case1.girls.head -> matches(case1.girls(1))
@@ -68,8 +77,38 @@ class StableMarriageFinderSuite extends AnyFunSuite {
 
     println(case1.girls.head + " and " + case1.girls(1) + " have switched partners")
 
+    // verify unstable if girls got swapped in first 2 pairs.
     assertResult(false, "Matches were unexpectedly stable") {
-      smp.checkMatches(case1, matches)
+      verifier.verifyStable(case1, matches)
+    }
+  }
+
+  // It does not work if the number of boy != number of girls.
+  test("test unstable marriage when more boys than girls") {
+
+    assertThrows[AssertionError] {
+      val marriagePreferences = new MarriagePreferences(
+        guys = List("abe", "bob", "col", "dan", "ed", "fred", "gav", "hal", "ian", "jon"),
+        girls = List("abi", "cath", "dee", "eve", "hope", "ivy"),
+        guyPrefers = Map(
+          "abe" -> List("abi", "eve", "cath", "ivy", "dee", "hope"),
+          "bob" -> List("cath", "hope", "abi", "dee", "eve", "ivy"),
+          "col" -> List("hope", "eve", "abi", "dee", "ivy", "cath"),
+          "dan" -> List("ivy", "dee", "hope", "eve", "cath", "abi"),
+          "ed" -> List("dee", "cath", "eve", "abi", "ivy", "hope"),
+          "fred" -> List("abi", "dee", "eve", "ivy", "cath", "hope"),
+          "gav" -> List("eve", "ivy", "cath", "abi", "dee", "hope"),
+          "hal" -> List("abi", "eve", "hope", "ivy", "cath", "dee"),
+          "ian" -> List("hope", "cath", "dee", "abi", "ivy", "eve"),
+          "jon" -> List("abi", "eve", "dee", "cath", "ivy", "hope")),
+        girlPrefers = Map(
+          "abi" -> List("bob", "fred", "jon", "gav", "ian", "abe", "dan", "ed", "col", "hal"),
+          "cath" -> List("fred", "bob", "ed", "gav", "hal", "col", "ian", "abe", "dan", "jon"),
+          "dee" -> List("fred", "jon", "col", "abe", "ian", "hal", "gav", "dan", "bob", "ed"),
+          "eve" -> List("jon", "hal", "fred", "dan", "abe", "gav", "col", "ed", "ian", "bob"),
+          "hope" -> List("gav", "jon", "bob", "abe", "ian", "dan", "hal", "ed", "col", "fred"),
+          "ivy" -> List("ian", "col", "hal", "gav", "fred", "bob", "abe", "ed", "jon", "dan"))
+      )
     }
   }
 
@@ -97,7 +136,7 @@ class StableMarriageFinderSuite extends AnyFunSuite {
       "4" -> "4")) { matches }
 
     assertResult(true, "Matches were unexpectedly unstable") {
-      smp.checkMatches(case2, matches)
+      verifier.verifyStable(case2, matches)
     }
   }
 
@@ -105,7 +144,9 @@ class StableMarriageFinderSuite extends AnyFunSuite {
     val rand = new scala.util.Random(1)
     val n = 100
 
-    def prefs(num: Int) = for (i <- 1 to num) yield { i -> List.fill(num)(rand.nextInt(num) + 1) }
+    def prefs(num: Int): Seq[(Int, List[Int])] =
+      for (i <- 1 to num) yield { i -> List.fill(num)(rand.nextInt(num) + 1) }
+
     val mp = new MarriagePreferences(n, guyPrefers = prefs(n).toMap, girlPrefers = prefs(n).toMap)
     val matches = smp.findMatches(mp)
 
@@ -126,7 +167,7 @@ class StableMarriageFinderSuite extends AnyFunSuite {
       "96" -> "42", "97" -> "69", "98" -> "75", "99" -> "48")) { matches }
 
     assertResult(false, "Matches were unexpectedly stable") {
-      smp.checkMatches(mp, matches)
+      verifier.verifyStable(mp, matches)
     }
   }
 
@@ -145,6 +186,5 @@ class StableMarriageFinderSuite extends AnyFunSuite {
 
     assertResult(n) { matches.size }
   }
-
 
 }

@@ -12,6 +12,8 @@ class MarriagePreferences(val guys: List[String],
                           val guyPrefers: Map[String, List[String]],
                           val girlPrefers: Map[String, List[String]]) {
 
+  assert (guys.length == girls.length)
+
   /**
     * Alternate constructor for when input is specified as integer indices.
     * @param numPairs number of men, and number of women. They will both be labeled "1", "2", ..."n".

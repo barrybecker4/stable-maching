@@ -28,10 +28,10 @@ class StableRoommateFinder {
   /**
     * Participants propose to each other, in a manner similar to that of the Gale-Shapley algorithm for
     * the stable marriage problem. Consider two participants, person and candidate.
-    * If candidate holds a proposal from person, then we remove from candidates's
+    * If candidate holds a proposal from person, then we remove from candidate's
     * list all participants x after person, and symmetrically, for each removed participant x,
     * we remove candidate from x's list, so that candidate is first in person's list;
-    * and person, last in candidates's. The resulting reduced set of preference lists together
+    * and person, last in candidate's. The resulting reduced set of preference lists together
     * is called the Phase 1 table. In this table, if any reduced list is empty, then there is no stable matching.
     * Otherwise, the Phase 1 table is a stable table.
     */
@@ -72,7 +72,7 @@ class StableRoommateFinder {
     reducedPrefs
   }
 
-  // remove from candidates's list all participants x after person
+  // remove from candidate's list all participants x after person
   private def rejectSymmetrically(person: String, candidate: String,
                                   reducedPrefs: mutable.Map[String, List[String]]): Unit = {
     val candidatePrefs = reducedPrefs(candidate)
