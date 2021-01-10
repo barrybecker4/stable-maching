@@ -26,12 +26,14 @@ class StableRoommateFinder {
   }
 
   /**
-    * Participants propose to each other, in a manner similar to that of the Gale-Shapley algorithm for the stable marriage problem.
-    * Consider two participants, person and candidate. If candidate holds a proposal from person, then we remove from candidates's
-    * list all participants x after person, and symmetrically, for each removed participant x, we remove candidate from x's list,
-    * so that candidate is first in person's list; and person, last in candidates's.
-    * The resulting reduced set of preference lists together is called the Phase 1 table.
-    * In this table, if any reduced list is empty, then there is no stable matching. Otherwise, the Phase 1 table is a stable table.
+    * Participants propose to each other, in a manner similar to that of the Gale-Shapley algorithm for
+    * the stable marriage problem. Consider two participants, person and candidate.
+    * If candidate holds a proposal from person, then we remove from candidates's
+    * list all participants x after person, and symmetrically, for each removed participant x,
+    * we remove candidate from x's list, so that candidate is first in person's list;
+    * and person, last in candidates's. The resulting reduced set of preference lists together
+    * is called the Phase 1 table. In this table, if any reduced list is empty, then there is no stable matching.
+    * Otherwise, the Phase 1 table is a stable table.
     */
   private def findInitialPairings(preferences: RoommatePreferences): mutable.Map[String, List[String]] = {
 
@@ -88,7 +90,7 @@ class StableRoommateFinder {
     *           rejectSymmetrically(qi, pi+1)
     * @return final reduced preferences
     */
-  private def reduceBasedOnCycles(reducedPrefs: mutable.Map[String, List[String]]) = {
+  private def reduceBasedOnCycles(reducedPrefs: mutable.Map[String, List[String]]): Unit = {
     var done = false
 
     // Repeat this process until someone has an empty preference list (no stable pairing),
@@ -106,9 +108,10 @@ class StableRoommateFinder {
           println("second pref list (for " + lastPrefsList.last + ") = " + reducedPrefs(lastPrefsList.last).mkString(", ")
             + " and size = " + reducedPrefs(lastPrefsList.last).length)
           if (reducedPrefs(lastPrefsList.last).size > 1) {
-            val secondPref = reducedPrefs(lastPrefsList.last).tail.head.toString
+            val secondPref = reducedPrefs(lastPrefsList.last).tail.head
             println("secondPref = " + secondPref + " test to see if in " + secondPrefsList)
-            println("does secondPrefsList " + secondPrefsList.mkString(", ") + " contain " + secondPref + "? " + secondPrefsList.contains(secondPref))
+            println("does secondPrefsList " + secondPrefsList.mkString(", ")
+              + " contain " + secondPref + "? " + secondPrefsList.contains(secondPref))
             if (secondPrefsList.contains(secondPref)) {
               done = true // dupe name
             }
@@ -118,7 +121,8 @@ class StableRoommateFinder {
               throw new IllegalArgumentException("Cannot find a stable matching.")
             }
             val lastPref = reducedPrefs(secondPref).last
-            println("does lastPrefsList " + lastPrefsList.mkString(", ") + " contain " + lastPref + "? " + lastPrefsList.contains(lastPref))
+            println("does lastPrefsList " + lastPrefsList.mkString(", ")
+              + " contain " + lastPref + "? " + lastPrefsList.contains(lastPref))
             if (lastPrefsList.contains(lastPref))
               done = true // dupe name
             lastPrefsList :+= lastPref
@@ -140,7 +144,8 @@ class StableRoommateFinder {
             lastPrefsList = lastPrefsList.tail
             secondPrefsList = secondPrefsList.tail
           }
-          println("\nreducedPrefs after symmetric removal = \n" + reducedPrefs.map(x => x._1 + " -> " + x._2.mkString(", ")).mkString("\n") + "\n")
+          println("\nreducedPrefs after symmetric removal = \n"
+            + reducedPrefs.map(x => x._1 + " -> " + x._2.mkString(", ")).mkString("\n") + "\n")
           done = false
         }
       } else done = true
@@ -159,7 +164,8 @@ class StableRoommateFinder {
         require (orig == entry._1, "Expected that " + entry._1 + " and the first element of " + favorite + "'s prefs: "
           + reducedPrefs(favorite).mkString(", ") + "  would be the same.")
         pairings.put(entry._1, favorite)
-        println("about to remove " + favorite + "'s list = "+ reducedPrefs(favorite).mkString(", ") + " it should contain only "+ entry._1)
+        println("about to remove " + favorite + "'s list = "
+          + reducedPrefs(favorite).mkString(", ") + " it should contain only "+ entry._1)
         reducedPrefs.remove(favorite)
       } else {
         throw new IllegalArgumentException("Cannot find a stable matching.")

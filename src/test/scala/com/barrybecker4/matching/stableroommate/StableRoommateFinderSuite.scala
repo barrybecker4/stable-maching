@@ -1,11 +1,11 @@
 package com.barrybecker4.matching.stableroommate
 
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
 /**
   * @author Barry Becker
   */
-class StableRoommateFinderSuite extends FunSuite {
+class StableRoommateFinderSuite extends AnyFunSuite {
 
   val srp = new StableRoommateFinder()
 
@@ -45,7 +45,7 @@ class StableRoommateFinderSuite extends FunSuite {
 
     val matches = srp.findMatches(twoPeople)
 
-    assertResult(Map("2" -> "1")) { matches }
+    assertResult(Map("1" -> "2")) { matches }
   }
 
   test("test stable roommates: trivial 4 person case") {
@@ -60,7 +60,7 @@ class StableRoommateFinderSuite extends FunSuite {
 
     val matches = srp.findMatches(fourPeople)
 
-    assertResult(Map("2" -> "1", "4" -> "3")) { matches }
+    assertResult(Map("1" -> "2", "3" -> "4")) { matches }
   }
 
   test("test stable roommates: unstable 4 person case (has cycle) (no one likes D") {
@@ -89,9 +89,9 @@ class StableRoommateFinderSuite extends FunSuite {
 
     val matches = srp.findMatches(case1)
 
-    assertResult(Map(
-      "dee" -> "col", "ed" -> "jan", "fred" -> "bea", "eve" -> "hal", "ian" -> "hope",
-      "abe" -> "ivy", "fay" -> "dan", "abi" -> "jon", "bob" -> "cath", "gay" -> "gav")
+    assertResult(
+      Map("fred" -> "bea", "dan" -> "fay", "abe" -> "ivy", "jan" -> "ed",
+        "gav" -> "gay", "jon" -> "abi", "hope" -> "ian", "col" -> "dee", "hal" -> "eve", "bob" -> "cath")
     ) { matches }
   }
 
@@ -109,7 +109,7 @@ class StableRoommateFinderSuite extends FunSuite {
 
     val matches = srp.findMatches(case2)
 
-    assertResult(Map("2" -> "5", "1" -> "6", "4" -> "3")) { matches }
+    assertResult(Map("1" -> "6", "2" -> "5", "3" -> "4")) { matches }
   }
 
   test("test stable roommates: integers only (no stable matching)") {
@@ -158,7 +158,9 @@ class StableRoommateFinderSuite extends FunSuite {
     val rand = new scala.util.Random(1)
     val n = 100
 
-    def prefs(num: Int) = for (i <- 1 to num) yield { i -> List.fill(num)(rand.nextInt(num) + 1) }
+    def prefs(num: Int): Seq[(Int, List[Int])] =
+      for (i <- 1 to num) yield { i -> List.fill(num)(rand.nextInt(num) + 1) }
+
     val mp = new RoommatePreferences(n, prefers = prefs(n).toMap)
 
     val srp = new StableRoommateFinder()

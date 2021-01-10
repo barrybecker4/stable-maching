@@ -1,2 +1,4 @@
-# stable-maching
-Implementation of stable marriage and stable roommate algorithms in scala
+# stable-matching
+
+Implementation of stable marriage and stable roommate algorithms in scala.
+

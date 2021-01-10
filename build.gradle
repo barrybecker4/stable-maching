@@ -1,6 +1,6 @@
-//plugins {
-//    id "com.github.maiflai.scalatest" version "0.14"
-//}
+plugins {
+    id "com.github.maiflai.scalatest" version "0.26"
+}
 
 apply plugin: 'scala'
 apply plugin: 'idea'
@@ -11,14 +11,18 @@ repositories {
 }
 
 dependencies {
-    compile 'org.scala-lang:scala-library:2.11.8'
-    testCompile 'org.scalatest:scalatest_2.11:3.0.1'
-    //testCompile 'org.scala-lang.modules:scala-xml_2.11.0-M7:1.0.0-RC7'
+    implementation 'org.scala-lang:scala-library:2.13.4'
+    testImplementation 'org.scalatest:scalatest_2.13:3.2.3'
+    testImplementation 'junit:junit:4.13'
+    testImplementation 'com.vladsch.flexmark:flexmark-all:0.35.10'
 
     // Used to generate html unit test report
-    testRuntime 'org.pegdown:pegdown:1.6.0'
+    testRuntimeOnly 'org.pegdown:pegdown:1.6.0'
 }
 
-task wrapper(type: Wrapper) {
-    gradleVersion = '3.2'
+
+if (rootProject == project) { // https://github.com/gradle/gradle/issues/5816
+    wrapper {
+        gradleVersion = '6.2'
+    }
 }

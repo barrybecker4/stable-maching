@@ -1,11 +1,11 @@
 package com.barrybecker4.matching.stablemarriage
 
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
 /**
   * @author Barry Becker
   */
-class StableMarriageFinderSuite extends FunSuite {
+class StableMarriageFinderSuite extends AnyFunSuite {
 
   val smp = new StableMarriageFinder()
 
@@ -135,7 +135,9 @@ class StableMarriageFinderSuite extends FunSuite {
     val rand = new scala.util.Random(1)
     val n = 2000
 
-    def prefs(num: Int) = for (i <- 1 to num) yield { i -> List.fill(num)(rand.nextInt(num) + 1) }
+    def prefs(num: Int): Seq[(Int, List[Int])] =
+      for (i <- 1 to num) yield { i -> List.fill(num)(rand.nextInt(num) + 1) }
+
     val mp = new MarriagePreferences(n, guyPrefers = prefs(n).toMap, girlPrefers = prefs(n).toMap)
 
     val smp: StableMarriageFinder = new StableMarriageFinder()
